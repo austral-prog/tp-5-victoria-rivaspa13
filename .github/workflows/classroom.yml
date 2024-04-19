@@ -1,0 +1,51 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test maximums exercise
+      id: test-maximums-exercise
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test maximums exercise
+        setup-command: pip install pytest
+        command: pytest tp5_maximums_test.py
+        timeout: 10
+        max-score: 1
+    - name: Test number_to_month exercise
+      id: test-number_to_month-exercise
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test number_to_month exercise
+        setup-command: pip install pytest
+        command: pytest tp5_number_to_month_test.py
+        timeout: 10
+        max-score: 1
+    - name: Test quadratic exercise
+      id: test-quadratic-exercise
+      uses: education/autograding-command-grader@v1
+      with:
+        test-name: Test quadratic exercise
+        setup-command: pip install pytest
+        command: pytest tp5_quadratic_test.py
+        timeout: 10
+        max-score: 1
+    - name: Autograding Reporter
+      uses: education/autograding-grading-reporter@v1
+      env:
+        TEST-MAXIMUMS-EXERCISE_RESULTS: "${{steps.test-maximums-exercise.outputs.result}}"
+        TEST-NUMBER_TO_MONTH-EXERCISE_RESULTS: "${{steps.test-number_to_month-exercise.outputs.result}}"
+        TEST-QUADRATIC-EXERCISE_RESULTS: "${{steps.test-quadratic-exercise.outputs.result}}"
+      with:
+        runners: test-maximums-exercise,test-number_to_month-exercise,test-quadratic-exercise
